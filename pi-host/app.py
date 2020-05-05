@@ -62,6 +62,7 @@ async def message_worker(queue, device_clients):
     while True:
         try:
             item = await queue.get()
+            #print(item)
 
             data = item.split(":")
 
@@ -69,21 +70,23 @@ async def message_worker(queue, device_clients):
             value_type = data[1]
             value = data[2]
 
-            print("Device:", device_id, "Value type:", value_type, "value", value)
+            #print("Device:", device_id, "Value type:", value_type, "value", value)
 
-            if device_id in last_values:
-                last_value = last_values[device_id]
+            value_key = device_id + ":" + value_type
+            if value_key in last_values:
+                last_value = last_values[value_key]
                 if last_value[0] == value and (time.time() - last_value[1]) < 60:
                     continue
 
             device = await get_device_client(device_id, device_clients)
             telemetry = build_telemetry(value_type, value)
 
-            print("Sending telemetry:", telemetry)
+            print("Sending item:", item)
+            #print("Sending telemetry:", telemetry)
 
             await device.send_message(telemetry)
 
-            last_values[device_id] = (value, time.time())
+            last_values[value_key] = (value, time.time())
 
         except Exception as error:
             print(error)
