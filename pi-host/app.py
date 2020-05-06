@@ -10,20 +10,11 @@ import time
 from azure.iot.device.aio import IoTHubDeviceClient, ProvisioningDeviceClient
 from azure.iot.device import MethodResponse
 from dotenv import load_dotenv
+from mappings import value_conversion, value_types
 
 load_dotenv()
 id_scope = os.getenv('ID_SCOPE')
 master_key = os.getenv('MASTER_KEY')
-
-value_types = {
-    "t" : "temperature",
-    "l" : "light"
-}
-
-value_conversion = {
-    "t" : float,
-    "l" : float
-}
 
 def compute_drived_symmetricKey(master_key, device_id):
     return base64.b64encode(hmac.new(base64.b64decode(master_key), msg=device_id.encode("utf8"), digestmod=hashlib.sha256).digest())
@@ -62,7 +53,7 @@ async def message_worker(queue, device_clients):
     while True:
         try:
             item = await queue.get()
-            #print(item)
+            print(item)
 
             data = item.split(":")
 
